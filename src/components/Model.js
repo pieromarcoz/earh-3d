@@ -15,8 +15,8 @@ export default function Model(props) {
   const nightLightsTexture = useTexture("/textures/earth night_lights_modified.png")
   const landOceanMask = useTexture("/textures/earth land ocean mask.png")
 
-  // Crear geometría de esfera perfecta con UV estándar
-  const sphereGeometry = useMemo(() => new THREE.SphereGeometry(1, 64, 32), [])
+  // Crear geometría de esfera optimizada (reducida para mejor performance)
+  const sphereGeometry = useMemo(() => new THREE.SphereGeometry(1, 48, 24), [])
 
   useEffect(() => {
     // Configurar texturas correctamente para mapeo de esfera estándar
@@ -61,9 +61,9 @@ export default function Model(props) {
     }
   })
 
-  // Material optimizado que combina día y noche
+  // Material optimizado que combina día y noche con mejor performance
   const earthMaterial = useMemo(() => {
-    return new THREE.MeshStandardMaterial({
+    const material = new THREE.MeshStandardMaterial({
       // Texturas principales
       map: earthTexture,
       normalMap: bumpTexture,
@@ -85,6 +85,8 @@ export default function Model(props) {
       transparent: false,
       side: THREE.FrontSide,
     })
+    
+    return material
   }, [earthTexture, bumpTexture, nightLightsTexture, landOceanMask])
 
   return (
@@ -92,7 +94,7 @@ export default function Model(props) {
       {/* Tierra base con todas las texturas */}
       <mesh ref={earthRef} geometry={sphereGeometry} material={earthMaterial} />
       
-      {/* Capa de nubes mejorada */}
+      {/* Capa de nubes optimizada */}
       <mesh ref={cloudsRef} geometry={sphereGeometry} scale={[1.01, 1.01, 1.01]}>
         <meshStandardMaterial
           map={cloudsTexture}

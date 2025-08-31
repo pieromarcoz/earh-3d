@@ -7,18 +7,50 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import Model from './Model'
 
-// Componente para mostrar texto de carga mientras carga el modelo 3D
-function LoadingText() {
+// Componente de loader sutil que mantiene la estética del proyecto
+function SpaceLoader() {
+  const loaderRef = useRef()
+  
+  useFrame((state) => {
+    if (loaderRef.current) {
+      // Animación sutil de rotación
+      loaderRef.current.rotation.y = state.clock.elapsedTime * 0.5
+    }
+  })
+
   return (
-    <Text
-      position={[0, 0, 0]}
-      fontSize={0.8}
-      color="white"
-      anchorX="center"
-      anchorY="middle"
-    >
-      Loading Earth...
-    </Text>
+    <group ref={loaderRef}>
+      {/* Esfera sutil con efecto de energía */}
+      <mesh>
+        <sphereGeometry args={[0.6, 16, 12]} />
+        <meshBasicMaterial
+          color="#4a90e2"
+          transparent={true}
+          opacity={0.3}
+          wireframe={true}
+        />
+      </mesh>
+      
+      {/* Puntos orbitales sutiles */}
+      {Array.from({ length: 4 }, (_, i) => (
+        <mesh key={i} position={[Math.cos(i * Math.PI / 2) * 0.9, Math.sin(i * Math.PI / 2) * 0.9, 0]}>
+          <sphereGeometry args={[0.04, 6, 6]} />
+          <meshBasicMaterial color="#88ccff" />
+        </mesh>
+      ))}
+      
+      {/* Texto de carga discreto */}
+      <Text
+        position={[0, -1.2, 0]}
+        fontSize={0.2}
+        color="#88ccff"
+        anchorX="center"
+        anchorY="middle"
+        opacity={0.8}
+      >
+        loading planetary data...
+      </Text>
+    </group>
   )
 }
 
@@ -26,26 +58,26 @@ function LoadingText() {
 function SpaceBackground() {
   return (
     <>
-      {/* Campo de estrellas denso y realista */}
+      {/* Campo de estrellas optimizado */}
       <Stars 
         radius={300} 
         depth={200} 
-        count={8000} 
-        factor={6} 
+        count={5000} 
+        factor={5} 
         saturation={0.1} 
         fade={true} 
-        speed={0.3} 
+        speed={0.2} 
       />
       
-      {/* Campo de estrellas lejanas */}
+      {/* Campo de estrellas lejanas optimizado */}
       <Stars 
         radius={500} 
         depth={300} 
-        count={3000} 
-        factor={2} 
+        count={2000} 
+        factor={1.5} 
         saturation={0} 
         fade={true} 
-        speed={0.1} 
+        speed={0.08} 
       />
     </>
   )
@@ -119,8 +151,14 @@ export default function FuturisticScene() {
       gl={{ 
         antialias: true, 
         toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 0.8 
+        toneMappingExposure: 0.8,
+        powerPreference: 'high-performance',
+        alpha: false,
+        stencil: false,
+        depth: true
       }}
+      performance={{ min: 0.5 }}
+      dpr={[1, 2]} // Dynamic resolution para mejor performance
     >
       {/* Fondo negro del espacio */}
       <color attach="background" args={['#000000']} />
@@ -132,7 +170,7 @@ export default function FuturisticScene() {
       <SpaceBackground />
 
       {/* Modelo 3D de la Tierra con suspensión de carga */}
-      <Suspense fallback={<LoadingText />}>
+      <Suspense fallback={<SpaceLoader />}>
         <Float speed={0.5} rotationIntensity={0.1} floatIntensity={0.3}>
           <Model scale={[1,1,1]} />
         </Float>
